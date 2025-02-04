@@ -79,7 +79,7 @@ function BLEController(props, ref) {
   }
 
   function sendingBLEinfo() {
-    send(`<${servoAngle}>;<${motorSpeed}>`, true);
+    send(`${servoAngle};${motorSpeed}`, true);
   }
 
   function handleCharacteristicValueChanged(event) {
