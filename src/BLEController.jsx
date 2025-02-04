@@ -29,21 +29,34 @@ function BLEController(props, ref) {
   const deviceCache = useRef(null);
   const characteristicCache = useRef(null);
   const intervalId = useRef(null);
+  
+  // Refs to store latest values
+  const servoAngleRef = useRef(servoAngle);
+  const motorSpeedRef = useRef(motorSpeed);
+  
+  // Update refs when state changes
+  useEffect(() => {
+    servoAngleRef.current = servoAngle;
+  }, [servoAngle]);
+  
+  useEffect(() => {
+    motorSpeedRef.current = motorSpeed;
+  }, [motorSpeed]);
 
   useEffect(() => {
-    //servo motor angle - 0 to 180 degrees. can't be negative
+    // Update servo motor angle
     if (coordinates.x > 0) {
-      setServoAngle(Math.round(90 + Math.abs(coordinates.x) * 90, 1));
+      setServoAngle(Math.round(90 + Math.abs(coordinates.x) * 90));
     } else {
-      setServoAngle(Math.round(90 - Math.abs(coordinates.x) * 90, 1));
+      setServoAngle(Math.round(90 - Math.abs(coordinates.x) * 90));
     }
 
-    //motor speed - 0 to 255. if negative, flag of direction is set to 1
+    // Update motor speed and direction
     if (coordinates.y > 0) {
-      setMotorSpeed(Math.round(Math.abs(coordinates.y) * 255, 1));
+      setMotorSpeed(Math.round(Math.abs(coordinates.y) * 255));
       setDirectionFlag(0);
     } else {
-      setMotorSpeed(Math.round(Math.abs(coordinates.y) * 255, 1));
+      setMotorSpeed(Math.round(Math.abs(coordinates.y) * 255));
       setDirectionFlag(1);
     }
   }, [coordinates]);
@@ -78,8 +91,12 @@ function BLEController(props, ref) {
     }
   }
 
+  // Use latest refs here
   function sendingBLEinfo() {
-    send(`${servoAngle};${motorSpeed}`, true);
+    const currentAngle = servoAngleRef.current;
+    const currentSpeed = motorSpeedRef.current;
+    console.log(`${currentAngle};${currentSpeed}`);
+    send(`${currentAngle};${currentSpeed}`, true);
   }
 
   function handleCharacteristicValueChanged(event) {
@@ -214,7 +231,7 @@ function BLEController(props, ref) {
         <strong>Motor Speed:</strong> {motorSpeed}
       </div>
       <div style={{ marginBottom: "1rem" }}>
-      <strong>Direction:</strong> {directionFlag === 0 ? "Forward" : "Backward"}
+        <strong>Direction:</strong> {directionFlag === 0 ? "Forward" : "Backward"}
       </div>
       <LogContainer>
         {logs.map((logItem, index) => (
